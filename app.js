@@ -19,17 +19,19 @@ db.connect( err => {
     }
 } );
 
+// Passport
+require('./config/passport')(passport);
+
 // Middlewares
 app.use(cookieParser());
 app.use(session({
     secret: 'This is a warehouse application.This is a warehouse application.',
     resave: true,
     saveUninitialized: true,
-    cookie: { secure: true }
 }));
 app.use(expressValidator());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
