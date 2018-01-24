@@ -25,12 +25,6 @@ module.exports = passport => {
                 if(!rows.length) {
                     return done(null, false, req.flash('error_msg', 'شماره پرسنلی اشتباه است!'));
                 } else {
-                    // if(!bcrypt.compareSync(password, rows[0].password)) {
-                    //     return done(null, false, req.flash('error_msg', 'گذرواژه اشتباه است!'));
-                    // } else {
-                    //     return done(null, rows[0]);
-                    // }
-                    console.log(password, rows[0].password);
                     bcrypt.compare(password, rows[0].password, (err, isMatched) => {
                         if(err) throw err;
                         if(!isMatched) {
