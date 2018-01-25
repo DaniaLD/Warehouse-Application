@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <% include ./partials/head.ejs %>
-    <title>افزودن کارمند</title>
+    <title>ویرایش اطلاعات</title>
 </head>
 <body>
 <div class="container">
     <div class="row" style="margin-top: 20px;">
-        <h1 style="margin-right: 20px;text-align: right;" class="col-lg-12">پنل کاربری راهبر > افزودن کارمند</h1>
+        <h1 style="margin-right: 20px;text-align: right;" class="col-lg-12">پنل کاربری راهبر > ویرایش اطلاعات</h1>
     </div>
     <hr>
     <% if(error_msg.length) { %>
@@ -21,38 +21,57 @@
         <h5 class="col-lg-12"><%= error.msg %></h5>
     </div>
     <% })} %>
-    <form class="col-lg-12" action="/add-staff" method="post">
+    <form class="col-lg-12" action="/edit-staff/:<%= staff.id %>" method="post">
         <div class="row justify-content-center" style="text-align: right;">
             <div class="form-group col-lg-4">
                 <label>نام<span style="color: red;margin-right: 7px;">*</span></label>
-                <input type="text" class="form-control" name="first_name">
+                <input type="text" class="form-control" name="first_name" value="<%= staff.first_name %>">
             </div>
         </div>
         <div class="row justify-content-center" style="text-align: right;">
             <div class="form-group col-lg-4">
                 <label>نام خانوادگی<span style="color: red;margin-right: 7px;">*</span></label>
-                <input type="text" class="form-control" name="last_name">
+                <input type="text" class="form-control" name="last_name" value="<%= staff.last_name %>">
             </div>
         </div>
+        <% if(staff.id !== 1) { %>
         <div class="row justify-content-center" style="text-align: right;">
             <div class="form-group col-lg-4">
                 <label>سمت<span style="color: red;margin-right: 7px;">*</span></label>
                 <select class="custom-select" name="post_no">
-                    <option selected></option>
-                    <option value="2">کارشناس انبار</option>
+                    <% if(staff.post_no === 2) { %>
+                    <option selected value="2">کارشناس انبار</option>
                     <option value="3">کارشناس خرید</option>
                     <option value="4">کارشناس برنامه ریزی</option>
+                    <% } else if(staff.post_no === 3) { %>
+                    <option value="2">کارشناس انبار</option>
+                    <option selected value="3">کارشناس خرید</option>
+                    <option value="4">کارشناس برنامه ریزی</option>
+                    <% } else if(staff.post_no === 4) { %>
+                    <option value="2">کارشناس انبار</option>
+                    <option value="3">کارشناس خرید</option>
+                    <option selected value="4">کارشناس برنامه ریزی</option>
+                    <% } %>
                 </select>
             </div>
         </div>
+        <% } %>
         <div class="row justify-content-center" style="text-align: right;">
             <div class="form-group col-lg-4">
-                <label>گذرواژه<span style="color: red;margin-right: 7px;">*</span></label>
-                <input type="password" class="form-control" name="password">
+                <label>وضعیت<span style="color: red;margin-right: 7px;">*</span></label>
+                <select class="custom-select" name="activate">
+                    <% if(staff.activate === 1) { %>
+                    <option selected value="1">فعال</option>
+                    <option value="0">غیر فعال</option>
+                    <% } else if(staff.activate === 0) { %>
+                    <option value="1">فعال</option>
+                    <option selected value="0">غیر فعال</option>
+                    <% } %>
+                </select>
             </div>
         </div>
         <div class="row justify-content-center" style="margin-top: 20px;">
-            <button type="submit" class="btn btn-success" style="margin-left: 20px;">افزودن</button>
+            <button type="submit" class="btn btn-warning" style="margin-left: 20px;">ویرایش</button>
             <a href="/staff-management"><button type="button" class="btn btn-danger">لغو</button></a>
         </div>
     </form>

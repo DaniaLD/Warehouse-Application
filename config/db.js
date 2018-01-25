@@ -13,10 +13,9 @@ module.exports = db;
 // const admin = {
 //     first_name: 'راهبر',
 //     last_name: 'راهبر',
-//     post: 'راهبر',
-//     password: bcrypt.hashSync('admin', salt),
-//     sta_id: 1
+//     post_no: 1,
+//     password: bcrypt.hashSync('admin', salt)
 // }
 //
-// let query = 'insert into staff ( first_name, last_name, post, password, sta_id ) values ( ?, ?, ?, ?, ?)';
-// db.query(query, [ admin.first_name, admin.last_name, admin.post, admin.password, admin.sta_id ]);
+// let query = 'insert into staff ( first_name, last_name, post_no, password ) values ( ?, ?, ?, ?)';
+// db.query(query, [ admin.first_name, admin.last_name, admin.post_no, admin.password ]);
