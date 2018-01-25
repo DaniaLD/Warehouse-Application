@@ -18,6 +18,8 @@ module.exports = (app, passport) => {
     app.get('/dashboard', isLoggedIn, (req, res) => {
         if(req.user.post_no === 1) {
             res.render('admin');
+        } else if(req.user.post_no === 2) {
+            res.render('warehousekeeper');
         }
     });
 
@@ -32,6 +34,8 @@ module.exports = (app, passport) => {
                 });
                 res.render('staff-management', { staffs: staffsArr });
             })
+        } else {
+            res.render('denied-access');
         }
     });
 
@@ -39,6 +43,8 @@ module.exports = (app, passport) => {
     app.get('/add-staff', isLoggedIn,(req, res) => {
         if(req.user.post_no === 1) {
             res.render('add-staff', { errors: null });
+        } else {
+            res.render('denied-access');
         }
     });
     app.post('/add-staff', isLoggedIn,(req, res) => {
@@ -82,7 +88,9 @@ module.exports = (app, passport) => {
                 if(err) throw err;
 
                 res.render('edit-staff', { staff: staff[0], errors: null });
-            })
+            });
+        } else {
+            res.render('denied-access');
         }
     });
     app.post('/edit-staff/:id', isLoggedIn, (req, res) => {
@@ -116,7 +124,7 @@ module.exports = (app, passport) => {
                 updatedStaff.last_name,
                 updatedStaff.post_no,
                 updatedStaff.activate,
-                updatedStaff.id], (err, updated) => {
+                updatedStaff.id], err => {
                 if(err) {
                     console.log('Could not update staff !!! => ' + err);
                 } else {
@@ -130,6 +138,137 @@ module.exports = (app, passport) => {
     // Add staff-interactions later
 
     // /\/\/\/\/\/\/\/\/\/\/\/\/\ END OF ADMIN SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\
+
+    // /\/\/\/\/\/\/\/\/\/\/\/\/\ WAREHOUSE KEEPER SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\
+
+    // **************** Good Management ****************
+    app.get('/good-management', isLoggedIn, (req, res) => {
+       if(req.user.post_no === 2) {
+           let goodArr = [];
+
+           let query = 'select * from good';
+           db.query(query, (err, goods) => {
+               if(err) throw err;
+               goods.forEach( good => {
+                   goodArr.push(good);
+               });
+               res.render('good-management', { goods: goodArr });
+           });
+       } else {
+           res.render('denied-access');
+       }
+    });
+
+    // **************** Add Good ****************
+    app.get('/add-good', (req, res) => {
+       if(req.user.post_no === 2) {
+           res.render('add-good', { errors: null });
+       } else {
+           res.render('denied-access');
+       }
+    });
+    app.post('/add-good', isLoggedIn, (req, res) => {
+        req.checkBody('name', 'نام الزامی است!').notEmpty();
+        req.checkBody('technical_number', 'شماره فنی الزامی است!').notEmpty();
+        req.checkBody('unit', 'واحد الزامی است!').notEmpty();
+        req.checkBody('number', 'تعداد الزامی است!').notEmpty();
+
+        let errors = req.validationErrors();
+
+        if(errors) {
+            res.render('add-good', { errors: errors });
+        } else {
+            let good = {
+                name: req.body.name,
+                technical_number: req.body.technical_number,
+                unit: req.body.unit,
+                number: req.body.number
+            }
+
+            let query = 'insert into good ( name, technical_number, unit, number) values (?,?,?,?)';
+            db.query(query, [ good.name, good.technical_number, good.unit, good.number ], (err, good) => {
+                if(err) {
+                    console.log('Could not add new good!!! => ' + err);
+                } else {
+                    let query = 'insert into staff_good ( staff_id, good_id ) values (?,?)';
+                    db.query(query, [req.user.id, good.insertId]);
+
+                    console.log('New good added successfully ...');
+                    req.flash('success_msg', 'کالای جدی اضافه شد.');
+                    res.redirect('/good-management');
+                }
+            });
+        }
+    });
+
+    // **************** Edit Good ****************
+    app.get('/edit-good/:id', isLoggedIn, (req, res) => {
+        if(req.user.post_no === 2) {
+            let id = req.params.id;
+            id = id.slice(1);
+
+            let query = 'select * from good where id = ?';
+            db.query(query, [id], (err, good) => {
+                if(err) throw err;
+
+                res.render('edit-good', { good: good[0], errors: null });
+            });
+        } else {
+            res.render('denied-access');
+        }
+    });
+    app.post('/edit-good/:id', isLoggedIn, (req, res) => {
+       let id = req.params.id;
+       id = id.slice(1);
+
+        req.checkBody('name', 'نام الزامی است!').notEmpty();
+        req.checkBody('technical_number', 'شماره فنی الزامی است!').notEmpty();
+        req.checkBody('unit', 'واحد الزامی است!').notEmpty();
+        req.checkBody('number', 'تعداد الزامی است!').notEmpty();
+
+        let errors = req.validationErrors();
+
+        if(errors) {
+            res.render('edit-good', { errors: errors });
+        } else {
+            let updatedGood = {
+                id: id,
+                name: req.body.name,
+                technical_number: req.body.technical_number,
+                unit: req.body.unit,
+                number: req.body.number
+            }
+
+            let query = 'update good set name = ?, technical_number = ?, unit = ?, number = ? where id = ?';
+            db.query(query, [
+                updatedGood.name,
+                updatedGood.technical_number,
+                updatedGood.unit,
+                updatedGood.number,
+                updatedGood.id ], (err, good) => {
+                if(err) {
+                    console.log('Could not update good!!! => ' + err);
+                } else {
+                    let query = 'insert into staff_good ( staff_id, good_id ) values (?,?)';
+                    db.query(query, [req.user.id, updatedGood.id], err => {
+                        if(err) {
+                            console.log('Updated good successfully ...');
+                            req.flash('success_msg', 'کالا با موفقیت اصلاح شد.');
+                            res.redirect('/good-management');
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+
+    // /\/\/\/\/\/\/\/\/\/\/\/\/\ END OF WAREHOUSE KEEPER SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\
+
+    app.get('/logout', (req, res) => {
+        req.logOut();
+        res.redirect('/login');
+    });
 }
 
 function isLoggedIn(req, res, next) {

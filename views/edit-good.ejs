@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <% include ./partials/head.ejs %>
-    <title>افزودن کارمند</title>
+    <title>ویرایش اطلاعات کالا</title>
 </head>
 <body>
 <div class="container">
     <div class="row" style="margin-top: 20px;">
-        <h1 style="margin-right: 20px;text-align: right;" class="col-lg-10">پنل کاربری راهبر > افزودن کارمند</h1>
+        <h1 style="margin-right: 20px;text-align: right;" class="col-lg-10">پنل کاربری کارشناس انبار > ویرایش اطلاعات کالا</h1>
         <a class="nav-item nav-link" href="/logout" style="float: left;">
             <button class="btn btn-danger"><i class="fa fa-sign-out" aria-hidden="true" style="margin-left: 10px;"></i>خروج</button>
         </a>
@@ -24,39 +24,34 @@
         <h5 class="col-lg-12"><%= error.msg %></h5>
     </div>
     <% })} %>
-    <form class="col-lg-12" action="/add-staff" method="post">
+    <form class="col-lg-12" action="/edit-good/:<%= good.id %>" method="post">
         <div class="row justify-content-center" style="text-align: right;">
             <div class="form-group col-lg-4">
                 <label>نام<span style="color: red;margin-right: 7px;">*</span></label>
-                <input type="text" class="form-control" name="first_name">
+                <input type="text" class="form-control" name="name" value="<%= good.name %>">
             </div>
         </div>
         <div class="row justify-content-center" style="text-align: right;">
             <div class="form-group col-lg-4">
-                <label>نام خانوادگی<span style="color: red;margin-right: 7px;">*</span></label>
-                <input type="text" class="form-control" name="last_name">
+                <label>شماره فنی<span style="color: red;margin-right: 7px;">*</span></label>
+                <input type="text" class="form-control" name="technical_number" value="<%= good.technical_number %>">
             </div>
         </div>
         <div class="row justify-content-center" style="text-align: right;">
             <div class="form-group col-lg-4">
-                <label>سمت<span style="color: red;margin-right: 7px;">*</span></label>
-                <select class="custom-select" name="post_no">
-                    <option selected></option>
-                    <option value="2">کارشناس انبار</option>
-                    <option value="3">کارشناس خرید</option>
-                    <option value="4">کارشناس برنامه ریزی</option>
-                </select>
+                <label>واحد<span style="color: red;margin-right: 7px;">*</span></label>
+                <input type="text" class="form-control" name="unit" value="<%= good.unit %>">
             </div>
         </div>
         <div class="row justify-content-center" style="text-align: right;">
             <div class="form-group col-lg-4">
-                <label>گذرواژه<span style="color: red;margin-right: 7px;">*</span></label>
-                <input type="password" class="form-control" name="password">
+                <label>تعداد<span style="color: red;margin-right: 7px;">*</span></label>
+                <input type="text" class="form-control" name="number" value="<%= good.number %>">
             </div>
         </div>
         <div class="row justify-content-center" style="margin-top: 20px;">
-            <button type="submit" class="btn btn-success" style="margin-left: 20px;">افزودن</button>
-            <a href="/staff-management"><button type="button" class="btn btn-danger">لغو</button></a>
+            <button type="submit" class="btn btn-warning" style="margin-left: 20px;">ویرایش</button>
+            <a href="/good-management"><button type="button" class="btn btn-danger">لغو</button></a>
         </div>
     </form>
 

@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <% include ./partials/head.ejs %>
-    <title>مدیریت کاربران</title>
+    <title>مدیریت کالاها</title>
 </head>
 <body>
 <div class="container">
     <div class="row" style="margin-top: 20px;">
-        <h1 style="margin-right: 20px;text-align: right;" class="col-lg-10">پنل کاربری راهبر > مدیریت کاربران</h1>
+        <h1 style="margin-right: 20px;text-align: right;" class="col-lg-10">پنل کاربری کارشناس انبار > مدیریت کالاها</h1>
         <a class="nav-item nav-link" href="/logout" style="float: left;">
             <button class="btn btn-danger"><i class="fa fa-sign-out" aria-hidden="true" style="margin-left: 10px;"></i>خروج</button>
         </a>
@@ -23,34 +23,30 @@
         <h5 class="col-lg-12"><%= success_msg %></h5>
     </div>
     <% } %>
-    <a href="/add-staff">
-        <button class="btn btn-success" style="margin: 30px;float: right;"><i class="fa fa-user-plus" aria-hidden="true" style="margin-left: 10px;"></i>افزودن کارمند</button>
+    <a href="/add-good">
+        <button class="btn btn-success" style="margin-top: 30px; margin-bottom: 40px; float: right;"><i class="fa fa-cubes" aria-hidden="true" style="margin-left: 10px;"></i>افزودن کالا</button>
     </a>
     <table class="table table-striped table-responsive-lg">
         <thead>
         <tr>
             <th style="width: 20%;text-align: center;" scope="col">نام</th>
-            <th style="width: 20%;text-align: center;" scope="col">نام خانوادگی</th>
-            <th style="width: 20%;text-align: center;" scope="col">سمت</th>
-            <th style="width: 20%;text-align: center;" scope="col">شماره پرسنلی</th>
-            <th style="width: 20%;text-align: center;" scope="col">وضعیت</th>
+            <th style="width: 20%;text-align: center;" scope="col">شماره فنی</th>
+            <th style="width: 20%;text-align: center;" scope="col">واحد</th>
+            <th style="width: 20%;text-align: center;" scope="col">تعداد</th>
+            <th style="width: 20%;text-align: center;" scope="col">کد جنس</th>
             <th style="width: 20%;text-align: center;" scope="col"> </th>
         </tr>
         </thead>
         <tbody>
-        <% for(let staff of staffs) { %>
-        <tr id="<%= staff.id %>">
-            <td style="width: 20%;text-align: center;"><%= staff.first_name %></td>
-            <td style="width: 20%;text-align: center;"><%= staff.last_name %></td>
-            <td style="width: 20%;text-align: center;"><%= staff.post_name %></td>
-            <td style="width: 20%;text-align: center;"><%= staff.id %></td>
-            <% if(staff.activate === 1) { %>
-            <td style="width: 20%;text-align: center;">فعال</td>
-            <% } else { %>
-            <td class="table-danger" style="width: 25%;text-align: center;">غیر فعال</td>
-            <% } %>
+        <% for(let good of goods) { %>
+        <tr id="<%= good.id %>">
+            <td style="width: 20%;text-align: center;"><%= good.name %></td>
+            <td style="width: 20%;text-align: center;"><%= good.technical_number %></td>
+            <td style="width: 20%;text-align: center;"><%= good.unit %></td>
+            <td style="width: 20%;text-align: center;"><%= good.number %></td>
+            <td style="width: 20%;text-align: center;"><%= good.id %></td>
             <td>
-                <a href="/edit-staff/:<%= staff.id %>">
+                <a href="/edit-good/:<%= good.id %>">
                     <button class="btn btn-warning">
                         <i class="fa fa-pencil" aria-hidden="true" style="margin-left: 10px;"></i>
                         <span style="font-size: 12px;">ویرایش</span>
