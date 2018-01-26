@@ -20,6 +20,8 @@ module.exports = (app, passport) => {
             res.render('admin');
         } else if(req.user.post_no === 2) {
             res.render('warehousekeeper');
+        } else if(req.user.post_no === 4) {
+            res.render('planner');
         }
     });
 
@@ -160,7 +162,7 @@ module.exports = (app, passport) => {
     });
 
     // **************** Add Good ****************
-    app.get('/add-good', (req, res) => {
+    app.get('/add-good', isLoggedIn,(req, res) => {
        if(req.user.post_no === 2) {
            res.render('add-good', { errors: null });
        } else {
@@ -194,7 +196,7 @@ module.exports = (app, passport) => {
                     db.query(query, [req.user.id, good.insertId]);
 
                     console.log('New good added successfully ...');
-                    req.flash('success_msg', 'کالای جدی اضافه شد.');
+                    req.flash('success_msg', 'کالای جدید اضافه شد.');
                     res.redirect('/good-management');
                 }
             });
@@ -262,8 +264,148 @@ module.exports = (app, passport) => {
         }
     });
 
+    // **************** Register Requirement Form ****************
+    app.get('/register-requirement-form', isLoggedIn, (req, res) => {
+        if(req.user.post_no === 2) {
+            res.render('requirement-form');
+        } else {
+            res.render('denied-access');
+        }
+    });
+
 
     // /\/\/\/\/\/\/\/\/\/\/\/\/\ END OF WAREHOUSE KEEPER SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\
+
+    // /\/\/\/\/\/\/\/\/\/\/\/\/\ Planning Unit SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\
+
+    // **************** Company Management ****************
+    app.get('/company-management', isLoggedIn, (req, res) => {
+        if(req.user.post_no === 4) {
+            let companyArr = [];
+
+            let query = 'select * from company';
+            db.query(query, (err, companies) => {
+                if(err) throw err;
+                companies.forEach( company => {
+                    companyArr.push(company);
+                });
+                res.render('company-management', { companies: companyArr });
+            });
+        } else {
+            res.render('denied-access');
+        }
+    });
+
+    // **************** Add Company ****************
+    app.get('/add-company', (req, res) => {
+        if(req.user.post_no === 4) {
+            res.render('add-company', { errors: null });
+        } else {
+            res.render('denied-access');
+        }
+    });
+    app.post('/add-company', isLoggedIn, (req, res) => {
+        req.checkBody('name', 'نام الزامی است!').notEmpty();
+        req.checkBody('phone', 'شماره تلفن الزامی است!').notEmpty();
+        req.checkBody('phone', 'شماره تلفن ناصحیح است!').isNumeric();
+        req.checkBody('phone', 'شماره تلفن باید فقط شامل اعداد صحیح باشد!').isInt();
+        req.checkBody('email', 'ایمیل الزامی است!').notEmpty();
+        req.checkBody('email', 'ایمیل ناصیحیح است!').isEmail();
+        req.checkBody('address', 'آدرس الزامی است!').notEmpty();
+
+        let errors = req.validationErrors();
+
+        if(errors) {
+            res.render('add-company', { errors: errors });
+        } else {
+            let company = {
+                name: req.body.name,
+                phone: req.body.phone,
+                email: req.body.email,
+                address: req.body.address
+            }
+
+            let query = 'insert into company ( name, phone, email, address) values (?,?,?,?)';
+            db.query(query, [ company.name, company.phone, company.email, company.address ], (err, company) => {
+                if(err) {
+                    console.log('Could not add new company!!! => ' + err);
+                } else {
+                    let query = 'insert into staff_company ( staff_id, company_id ) values (?,?)';
+                    db.query(query, [req.user.id, company.insertId]);
+
+                    console.log('New company added successfully ...');
+                    req.flash('success_msg', 'شرکت جدید اضافه شد.');
+                    res.redirect('/company-management');
+                }
+            });
+        }
+    });
+
+    // **************** Edit Company ****************
+    app.get('/edit-company/:id', isLoggedIn, (req, res) => {
+        if(req.user.post_no === 4) {
+            let id = req.params.id;
+            id = id.slice(1);
+
+            let query = 'select * from company where id = ?';
+            db.query(query, [id], (err, company) => {
+                if(err) throw err;
+
+                res.render('edit-company', { company: company[0], errors: null });
+            });
+        } else {
+            res.render('denied-access');
+        }
+    });
+    app.post('/edit-company/:id', isLoggedIn, (req, res) => {
+        let id = req.params.id;
+        id = id.slice(1);
+
+        req.checkBody('name', 'نام الزامی است!').notEmpty();
+        req.checkBody('phone', 'شماره تلفن الزامی است!').notEmpty();
+        req.checkBody('phone', 'شماره تلفن ناصحیح است!').isNumeric();
+        req.checkBody('phone', 'شماره تلفن باید فقط شامل اعداد صحیح باشد!').isInt();
+        req.checkBody('email', 'ایمیل الزامی است!').notEmpty();
+        req.checkBody('email', 'ایمیل ناصیحیح است!').isEmail();
+        req.checkBody('address', 'آدرس الزامی است!').notEmpty();
+
+        let errors = req.validationErrors();
+
+        if(errors) {
+            res.render('edit-company', { errors: errors });
+        } else {
+            let updatedCompany = {
+                id: id,
+                name: req.body.name,
+                phone: req.body.phone,
+                email: req.body.email,
+                address: req.body.address
+            }
+
+            let query = 'update company set name = ?, phone = ?, email = ?, address = ? where id = ?';
+            db.query(query, [
+                updatedCompany.name,
+                updatedCompany.phone,
+                updatedCompany.email,
+                updatedCompany.address,
+                updatedCompany.id ], (err, good) => {
+                if(err) {
+                    console.log('Could not update company!!! => ' + err);
+                } else {
+                    let query = 'insert into staff_company ( staff_id, company_id ) values (?,?)';
+                    db.query(query, [req.user.id, updatedCompany.id], err => {
+                        if(err) {
+                            console.log('Updated company successfully ...');
+                            req.flash('success_msg', 'شرکت با موفقیت اصلاح شد.');
+                            res.redirect('/company-management');
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    // /\/\/\/\/\/\/\/\/\/\/\/\/\ END OF Planning Unit SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\
 
     app.get('/logout', (req, res) => {
         req.logOut();
