@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
+const jalaali = require('jalaali-js');
 
 module.exports = (app, passport) => {
     // /\/\/\/\/\/\/\/\/\/\/\/\/\ ADMIN SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\
@@ -264,12 +265,121 @@ module.exports = (app, passport) => {
         }
     });
 
-    // **************** Register Requirement Form ****************
-    app.get('/register-requirement-form', isLoggedIn, (req, res) => {
+    // **************** Requirement Form Management ****************
+    app.get('/requirement-form-management', isLoggedIn, (req, res) => {
         if(req.user.post_no === 2) {
-            res.render('requirement-form');
+            let rowsArr = [];
+
+            let query = 'select * from row join good on row.good_id = good.id join form on row.form_id = form.id where form.finished_no = 2';
+            db.query(query, (err, rows) => {
+                if(err) throw err;
+                rows.forEach( row => {
+                    rowsArr.push(row);
+                });
+                res.render('requirement-form-management', { rows: rowsArr });
+            });
         } else {
             res.render('denied-access');
+        }
+    });
+
+    // **************** Register Requirement Form ****************
+    app.get('/register-requirement-form', isLoggedIn,(req, res) => {
+        if(req.user.post_no === 2) {
+            let currentDate = {
+                year: new Date().getFullYear(),
+                month: new Date().getMonth()+1,
+                day: new Date().getDate(),
+            }
+
+            let currentJalaaliDate = jalaali.toJalaali(currentDate.year, currentDate.month, currentDate.day);
+            let decoratedDate = currentJalaaliDate.jy + '/' + currentJalaaliDate.jm + '/' + currentJalaaliDate.jd;
+
+            res.render('register-requirement-form', { errors: null, currentDate: decoratedDate, userID: req.user.id });
+        } else {
+            res.render('denied-access');
+        }
+    });
+    app.post('/register-requirement-form', (req, res) => {
+        if(req.body.comment === "") {
+            req.body.comment = null;
+        }
+
+       let form = {
+           sta_id: req.user.id,
+           type_no: 1,
+           created: new Date(),
+           comment: req.body.comment
+       }
+       let query = 'insert into form ( sta_id, type_no, created, comment ) values(?,?,?,?)';
+        db.query(query, [ form.sta_id, form.type_no, form.created, form.comment ], (err, form) => {
+           if(err) {
+               console.log('Could not add new form !!! => ' + err);
+           } else {
+               req.flash('success_msg', 'فرم با موفقیت اضافه شد.');
+               res.redirect('/add-requirement-form-row/:' + form.insertId);
+           }
+        });
+    });
+
+    // **************** Add Requirement Form Row ****************
+    app.get('/add-requirement-form-row/:id', isLoggedIn,(req, res) => {
+        let formId = req.params.id;
+        formId = formId.slice(1);
+
+        let query = 'select * from form where form.id = ?';
+        db.query(query, [formId], (err, forms) => {
+            if(err) throw err;
+            if(req.user.post_no === 2 && forms[0].sta_id === req.user.id) {
+                let rowArr = [];
+
+                let query = 'select * from row join good on row.good_id = good.id where form_id = ?';
+                db.query(query, [formId], (err, rows) => {
+                    if(err) throw err;
+                    rows.forEach(row => {
+                        rowArr.push(row);
+                    });
+                    res.render('add-requirement-form-row', { errors:null, rows: rowArr, formID: formId });
+                });
+            } else {
+                res.render('denied-access');
+            }
+        });
+    });
+    app.post('/add-requirement-form-row/:id', isLoggedIn,(req, res) => {
+        let formId = req.params.id;
+        formId = formId.slice(1);
+
+        req.checkBody('id', 'کد جنس الزامی است!').notEmpty();
+        req.checkBody('no', 'تعداد الزامی است!').notEmpty();
+
+        if(req.body.explanation === "") {
+            req.body.explanation = null;
+        }
+
+        let errors = req.validationErrors();
+
+        if(errors) {
+            res.render('add-requirement-form-row', { errors: errors });
+        } else {
+            let row = {
+                form_id: formId,
+                good_id: req.body.id,
+                no: req.body.no,
+                explanation: req.body.explanation
+            }
+
+            let query = 'insert into row ( form_id, good_id, no, explanation ) values(?,?,?,?)';
+            db.query(query, [ row.form_id, row.good_id, row.no, row.explanation ], (err) => {
+                if(err) {
+                    console.log('Could not add new row !!! => ' + err);
+                    req.flash('error_msg', 'خطا در افزودن اطلاعات! لطفا اطلاعات ورودی را بررسی کنید.');
+                    res.redirect('/add-requirement-form-row/:' + formId);
+                } else {
+                    req.flash('success_msg', 'ردیف جدید با موفقیت اضافه شد.');
+                    res.redirect('/add-requirement-form-row/:' + formId);
+                }
+            });
         }
     });
 
@@ -297,7 +407,7 @@ module.exports = (app, passport) => {
     });
 
     // **************** Add Company ****************
-    app.get('/add-company', (req, res) => {
+    app.get('/add-company', isLoggedIn, (req, res) => {
         if(req.user.post_no === 4) {
             res.render('add-company', { errors: null });
         } else {
@@ -388,7 +498,7 @@ module.exports = (app, passport) => {
                 updatedCompany.phone,
                 updatedCompany.email,
                 updatedCompany.address,
-                updatedCompany.id ], (err, good) => {
+                updatedCompany.id ], (err) => {
                 if(err) {
                     console.log('Could not update company!!! => ' + err);
                 } else {
