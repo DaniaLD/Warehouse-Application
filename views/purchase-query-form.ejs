@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <% include ./partials/head.ejs %>
+    <title>بررسی اعلام نیاز و ثبت درخواست خرید</title>
+</head>
+<body>
+<div class="container">
+    <div class="row" style="margin-top: 20px;">
+        <h1 style="margin-right: 20px;text-align: right;" class="col-lg-10">پنل کاربری کارشناس برنامه ریزی > بررسی اعلام نیاز و ثبت درخواست خرید</h1>
+        <a class="nav-item nav-link" href="/logout" style="float: left;">
+            <button class="btn btn-danger"><i class="fa fa-sign-out" aria-hidden="true" style="margin-left: 10px;"></i>خروج</button>
+        </a>
+    </div>
+    <hr>
+    <% if(error_msg.length) { %>
+    <div class="row alert alert-danger" style="text-align: center;">
+        <h5 class="col-lg-12"><%= error_msg %></h5>
+    </div>
+    <% } %>
+    <% if(success_msg.length) { %>
+    <div class="row alert alert-success" style="text-align: center;">
+        <h5 class="col-lg-12"><%= success_msg %></h5>
+    </div>
+    <% } %>
+    <div class="row">
+        <p class="col-lg-6" style="text-align: right;"> کد پرسنلی : <%= form.id %></p>
+        <p class="col-lg-6">تاریخ ثبت درخواست خرید : <%= currentJalaaliDate %></p>
+    </div>
+    <form action="/purchase-query-form/:<%= form.id %>" method="post" class="col-lg-12" style="margin-top: 35px;">
+        <div class="row justify-content-center" style="text-align: right;">
+            <div class="form-group col-lg-5">
+                <label>اولویت<span style="color: red;margin-right: 7px;">*</span></label>
+                <select class="custom-select" name="post_no">
+                    <option selected></option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+            <div class="form-group col-lg-5">
+                <label>تاریخ نیاز<span style="color: red;margin-right: 7px;">*</span></label>
+                <input type="text" class="form-control" name="need_date">
+            </div>
+        </div>
+        <div class="row justify-content-center" style="text-align: right;">
+            <lablel style="margin-bottom: 10px;">توضیحات فرم (در صورت وجود) :</lablel>
+            <textarea name="comment" cols="111" rows="7" style="border: 1px solid #cccccc;"></textarea>
+        </div>
+        <div class="row justify-content-center" style="text-align: right; margin-top: 15px;">
+            <div class="form-group col-lg-6">
+                <label> شرکت پیشنهادی<span style="color: red;margin-right: 7px;">*</span></label>
+                <select class="custom-select" name="post_no">
+                    <option selected></option>
+                    <% for(let company of companies) { %>
+                    <option value="<%= company.id %>"><%= company.name %></option>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+    </form>
+    <table class="table table-striped table-responsive-lg">
+        <thead>
+        <tr>
+            <th style="width: 8%;text-align: center;" scope="col">کد جنس</th>
+            <th style="width: 8%;text-align: center;" scope="col">نام کالا</th>
+            <th style="width: 15%;text-align: center;" scope="col">واحد</th>
+            <th style="width: 15%;text-align: center;" scope="col">تعداد درخواست</th>
+            <th style="width: 15%;text-align: center;" scope="col">توضیحات</th>
+            <th style="width: 15%;text-align: center;" scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <% for(let row of rows) { %>
+        <tr>
+            <td style="width: 10%;text-align: center;"><%= row.good_id %></td>
+            <td style="width: 10%;text-align: center;"><%= row.name %></td>
+            <td style="width: 20%;text-align: center;"><%= row.unit %></td>
+            <td style="width: 20%;text-align: center;"><%= row.no %></td>
+            <td style="width: 20%;text-align: center;"><%= row.explanation %></td>
+            <td>
+                <a href="/purchase-query-form/:<%= row.form_id %>">
+                    <button class="btn btn-warning">
+                        <i class="fa fa-pencil" aria-hidden="true" style="margin-left: 10px;"></i>
+                        <span style="font-size: 12px;">ویرایش</span>
+                    </button>
+                </a>
+            </td>
+        </tr>
+        <% } %>
+        </tbody>
+    </table>
+
+</div>
+
+<% include ./partials/scripts.ejs %>
+</body>
+</html>

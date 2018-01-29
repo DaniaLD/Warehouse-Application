@@ -161,6 +161,28 @@ module.exports = (app, passport) => {
            res.render('denied-access');
        }
     });
+    app.post('/good-management', isLoggedIn, (req, res) => {
+        let goodArr = [];
+        let query = 'select * from good where id = ? or name = ? or technical_number = ? or number = ?';
+
+        db.query(query, [
+            req.body.id || null,
+            req.body.name || null,
+            req.body.technical_number || null,
+            req.body.number || null
+        ], (err, good) => {
+            if(err) throw err;
+
+            if(good.length) {
+                goodArr.push(good[0]);
+
+                res.render('good-management', { goods: goodArr });
+            } else {
+                req.flash('error_msg', 'کالایی با این مشخصات وجود ندارد!');
+                res.redirect('/good-management');
+            }
+        });
+    });
 
     // **************** Add Good ****************
     app.get('/add-good', isLoggedIn,(req, res) => {
@@ -513,6 +535,69 @@ module.exports = (app, passport) => {
                 }
             });
         }
+    });
+
+    // **************** Purchase Query Management ****************
+    app.get('/purchase-query-management', isLoggedIn,(req, res) => {
+        let formArr = [];
+        let decoratedDate;
+
+        let query = 'select *, form.id as form_id, form.sta_id as form_sta_id from form join staff on form.sta_id = staff.id where finished_no = 2';
+        db.query(query, (err, forms) => {
+            if(err) throw err;
+            forms.forEach(form => {
+                formArr.push(form);
+
+                let createdDate = {
+                    year: form.created.getFullYear(),
+                    month: form.created.getMonth()+1,
+                    day: form.created.getDate(),
+                }
+
+                let createdJalaaliDate = jalaali.toJalaali(createdDate.year, createdDate.month, createdDate.day);
+                decoratedDate = createdJalaaliDate.jy + '/' + createdJalaaliDate.jm + '/' + createdJalaaliDate.jd;
+            });
+
+            res.render('purchase-query-management', { errors: null, forms: formArr, createdJalaali: decoratedDate });
+        });
+    });
+
+    // **************** Purchase Query Form ****************
+    app.get('/purchase-query-form/:id', isLoggedIn, (req, res) => {
+       let formId = req.params.id.slice(1);
+       let decoratedDate;
+       let companyArr = [];
+
+       let query = 'select * from form where id = ?';
+       db.query(query, [formId], (err, form) => {
+           if(err) throw err;
+
+           let currentDate = {
+               year: new Date().getFullYear(),
+               month: new Date().getMonth()+1,
+               day: new Date().getDate(),
+           }
+
+           let currentJalaaliDate = jalaali.toJalaali(currentDate.year, currentDate.month, currentDate.day);
+           decoratedDate = currentJalaaliDate.jy + '/' + currentJalaaliDate.jm + '/' + currentJalaaliDate.jd;
+
+           db.query('select * from company', ( err, companies ) => {
+              if(err) throw err;
+
+              let query = 'select * from row join good on row.good_id = good.id where row.form_id = ?';
+              db.query(query, [formId], (err, rows) => {
+                 if(err) throw err;
+
+                  res.render('purchase-query-form', {
+                      errors: null,
+                      form: form[0],
+                      currentJalaaliDate: decoratedDate,
+                      companies: companies,
+                      rows: rows
+                  });
+              });
+           });
+       });
     });
 
     // /\/\/\/\/\/\/\/\/\/\/\/\/\ END OF Planning Unit SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\

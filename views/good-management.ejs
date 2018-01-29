@@ -26,6 +26,124 @@
     <a href="/add-good">
         <button class="btn btn-success" style="margin-top: 30px; margin-bottom: 40px; float: right;"><i class="fa fa-cubes" aria-hidden="true" style="margin-left: 10px;"></i>افزودن کالا</button>
     </a>
+    <div class="row col-lg-12">
+        <div id="accordion1" class="col-lg-6" style="margin-bottom: 30px; text-align: right; display: inline-block;">
+            <div class="card">
+                <div class="card-header" id="headingOne">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne" style="text-decoration: none;">
+                            <p><i class="fa fa-search" aria-hidden="true" style="margin-left: 10px;"></i>جست و جو بر اساس کد جنس</p>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion1">
+                    <div class="card-body">
+                        <form action="/good-management" method="post" class="col-lg-12">
+                            <div class="row justify-content-center" style="text-align: right;">
+                                <div class="form-group col-lg-6">
+                                    <input type="text" name="id" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row justify-content-center" style="text-align: right;">
+                                <button class="btn btn-success col-lg-2" type="submit" style="">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="accordion2" class="col-lg-6" style="margin-bottom: 30px; text-align: right; display: inline-block;">
+            <div class="card">
+                <div class="card-header" id="headingTwo">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseOne" style="text-decoration: none;">
+                            <p><i class="fa fa-search" aria-hidden="true" style="margin-left: 10px;"></i>جست و جو بر اساس نام</p>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion2">
+                    <div class="card-body">
+                        <form action="/good-management" method="post" class="col-lg-12">
+                            <div class="row justify-content-center" style="text-align: right;">
+                                <div class="form-group col-lg-6">
+                                    <input type="text" name="name" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row justify-content-center" style="text-align: right;">
+                                <button class="btn btn-success col-lg-2" type="submit" style="">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="accordion3" class="col-lg-6" style="margin-bottom: 30px; text-align: right; display: inline-block;">
+            <div class="card">
+                <div class="card-header" id="headingThree">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseThree" aria-expanded="true" aria-controls="collapseOne" style="text-decoration: none;">
+                            <p><i class="fa fa-search" aria-hidden="true" style="margin-left: 10px;"></i>جست و جو بر اساس شماره فنی</p>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion3">
+                    <div class="card-body">
+                        <form action="/good-management" method="post" class="col-lg-12">
+                            <div class="row justify-content-center" style="text-align: right;">
+                                <div class="form-group col-lg-6">
+                                    <input type="text" name="technical_number" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row justify-content-center" style="text-align: right;">
+                                <button class="btn btn-success col-lg-2" type="submit" style="">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="accordion4" class="col-lg-6" style="margin-bottom: 30px; text-align: right; display: inline-block;">
+            <div class="card">
+                <div class="card-header" id="headingFour">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseFour" aria-expanded="true" aria-controls="collapseOne" style="text-decoration: none;">
+                            <p><i class="fa fa-search" aria-hidden="true" style="margin-left: 10px;"></i>جست و جو بر اساس تعداد</p>
+                        </button>
+                    </h5>
+                </div>
+
+                <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion4">
+                    <div class="card-body">
+                        <form action="/good-management" method="post" class="col-lg-12">
+                            <div class="row justify-content-center" style="text-align: right;">
+                                <div class="form-group col-lg-6">
+                                    <input type="text" name="number" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row justify-content-center" style="text-align: right;">
+                                <button class="btn btn-success col-lg-2" type="submit" style="">
+                                    <i class="fa fa-search" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
     <table class="table table-striped table-responsive-lg">
         <thead>
         <tr>
@@ -38,7 +156,8 @@
         </tr>
         </thead>
         <tbody>
-        <% for(let good of goods) { %>
+        <% if(goods.length) {
+            for(let good of goods) { %>
         <tr id="<%= good.id %>">
             <td style="width: 20%;text-align: center;"><%= good.name %></td>
             <td style="width: 20%;text-align: center;"><%= good.technical_number %></td>
@@ -54,7 +173,7 @@
                 </a>
             </td>
         </tr>
-        <% } %>
+        <% }} %>
         </tbody>
     </table>
 
