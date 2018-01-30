@@ -13,6 +13,12 @@
         </a>
     </div>
     <hr>
+    <% if(errors) {
+    errors.forEach(error => { %>
+    <div class="row alert alert-danger" style="text-align: center;">
+        <h5 class="col-lg-12"><%= error.msg %></h5>
+    </div>
+    <% })} %>
     <% if(error_msg.length) { %>
     <div class="row alert alert-danger" style="text-align: center;">
         <h5 class="col-lg-12"><%= error_msg %></h5>
@@ -41,7 +47,9 @@
             <td style="width: 10%;text-align: center;"><%= form.form_sta_id %></td>
             <td style="width: 20%;text-align: center;"><%= form.first_name %></td>
             <td style="width: 20%;text-align: center;"><%= form.last_name %></td>
-            <td style="width: 20%;text-align: center;"><%= createdJalaali %></td>
+            <% for(let i of createdJalaali) { %>
+            <td style="width: 20%;text-align: center;"><%= createdJalaali[i] %></td>
+            <% } %>
             <td>
                 <a href="/purchase-query-form/:<%= form.form_id %>">
                     <button class="btn btn-warning">

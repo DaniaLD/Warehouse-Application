@@ -170,12 +170,13 @@ module.exports = (app, passport) => {
             req.body.name || null,
             req.body.technical_number || null,
             req.body.number || null
-        ], (err, good) => {
+        ], (err, goods) => {
             if(err) throw err;
 
-            if(good.length) {
-                goodArr.push(good[0]);
-
+            if(goods) {
+                goods.forEach(good => {
+                    goodArr.push(good);
+                });
                 res.render('good-management', { goods: goodArr });
             } else {
                 req.flash('error_msg', 'کالایی با این مشخصات وجود ندارد!');
@@ -195,8 +196,10 @@ module.exports = (app, passport) => {
     app.post('/add-good', isLoggedIn, (req, res) => {
         req.checkBody('name', 'نام الزامی است!').notEmpty();
         req.checkBody('technical_number', 'شماره فنی الزامی است!').notEmpty();
+        req.checkBody('technical_number', 'شماره فنی فقط باید عدد باشد!').isNumeric();
         req.checkBody('unit', 'واحد الزامی است!').notEmpty();
         req.checkBody('number', 'تعداد الزامی است!').notEmpty();
+        req.checkBody('number', 'تعداد فقط باید عدد باشد!').isNumeric();
 
         let errors = req.validationErrors();
 
@@ -248,8 +251,10 @@ module.exports = (app, passport) => {
 
         req.checkBody('name', 'نام الزامی است!').notEmpty();
         req.checkBody('technical_number', 'شماره فنی الزامی است!').notEmpty();
+        req.checkBody('technical_number', 'شماره فنی فقط باید عدد باشد!').isNumeric();
         req.checkBody('unit', 'واحد الزامی است!').notEmpty();
         req.checkBody('number', 'تعداد الزامی است!').notEmpty();
+        req.checkBody('number', 'تعداد فقط باید عدد باشد!').isNumeric();
 
         let errors = req.validationErrors();
 
@@ -539,65 +544,137 @@ module.exports = (app, passport) => {
 
     // **************** Purchase Query Management ****************
     app.get('/purchase-query-management', isLoggedIn,(req, res) => {
-        let formArr = [];
-        let decoratedDate;
+        if(req.user.post_no === 4) {
+            let formArr = [];
+            let decoratedDate = [];
+            // and form.id != purchase_query.id
+            let query = 'select *, form.id as form_id, form.sta_id as form_sta_id from form join staff on form.sta_id = staff.id where finished_no = 2 and form.type_no = 1';
+            db.query(query, (err, forms) => {
+                if (err) throw err;
+                forms.forEach(form => {
+                    formArr.push(form);
 
-        let query = 'select *, form.id as form_id, form.sta_id as form_sta_id from form join staff on form.sta_id = staff.id where finished_no = 2';
-        db.query(query, (err, forms) => {
-            if(err) throw err;
-            forms.forEach(form => {
-                formArr.push(form);
+                    let createdDate = {
+                        year: form.created.getFullYear(),
+                        month: form.created.getMonth() + 1,
+                        day: form.created.getDate(),
+                    }
 
-                let createdDate = {
-                    year: form.created.getFullYear(),
-                    month: form.created.getMonth()+1,
-                    day: form.created.getDate(),
-                }
+                    let createdJalaaliDate = jalaali.toJalaali(createdDate.year, createdDate.month, createdDate.day);
+                    let designedDate = createdJalaaliDate.jy + '/' + createdJalaaliDate.jm + '/' + createdJalaaliDate.jd;
 
-                let createdJalaaliDate = jalaali.toJalaali(createdDate.year, createdDate.month, createdDate.day);
-                decoratedDate = createdJalaaliDate.jy + '/' + createdJalaaliDate.jm + '/' + createdJalaaliDate.jd;
+                    decoratedDate.push(designedDate);
+                });
+
+                res.render('purchase-query-management', {errors: null, forms: formArr, createdJalaali: decoratedDate});
             });
-
-            res.render('purchase-query-management', { errors: null, forms: formArr, createdJalaali: decoratedDate });
-        });
+        } else {
+            res.render('denied-access');
+        }
     });
 
     // **************** Purchase Query Form ****************
     app.get('/purchase-query-form/:id', isLoggedIn, (req, res) => {
-       let formId = req.params.id.slice(1);
-       let decoratedDate;
-       let companyArr = [];
+        if(req.user.post_no === 4) {
+            let formId = req.params.id.slice(1);
+            let decoratedDate;
+            let companyArr = [];
 
-       let query = 'select * from form where id = ?';
-       db.query(query, [formId], (err, form) => {
-           if(err) throw err;
+            let query = 'select * from form where id = ?';
+            db.query(query, [formId], (err, form) => {
+                if(err) throw err;
 
-           let currentDate = {
-               year: new Date().getFullYear(),
-               month: new Date().getMonth()+1,
-               day: new Date().getDate(),
-           }
+                let currentDate = {
+                    year: new Date().getFullYear(),
+                    month: new Date().getMonth()+1,
+                    day: new Date().getDate(),
+                }
 
-           let currentJalaaliDate = jalaali.toJalaali(currentDate.year, currentDate.month, currentDate.day);
-           decoratedDate = currentJalaaliDate.jy + '/' + currentJalaaliDate.jm + '/' + currentJalaaliDate.jd;
+                let currentJalaaliDate = jalaali.toJalaali(currentDate.year, currentDate.month, currentDate.day);
+                decoratedDate = currentJalaaliDate.jy + '/' + currentJalaaliDate.jm + '/' + currentJalaaliDate.jd;
 
-           db.query('select * from company', ( err, companies ) => {
-              if(err) throw err;
+                db.query('select * from company', ( err, companies ) => {
+                    if(err) throw err;
 
-              let query = 'select * from row join good on row.good_id = good.id where row.form_id = ?';
-              db.query(query, [formId], (err, rows) => {
-                 if(err) throw err;
+                    let query = 'select * from row join good on row.good_id = good.id where row.form_id = ?';
+                    db.query(query, [formId], (err, rows) => {
+                        if(err) throw err;
 
-                  res.render('purchase-query-form', {
-                      errors: null,
-                      form: form[0],
-                      currentJalaaliDate: decoratedDate,
-                      companies: companies,
-                      rows: rows
-                  });
-              });
-           });
-       });
+                        res.render('purchase-query-form', {
+                            errors: null,
+                            form: form[0],
+                            currentJalaaliDate: decoratedDate,
+                            companies: companies,
+                            rows: rows
+                        });
+                    });
+                });
+            });
+        } else {
+            res.render('denied-access');
+        }
+    });
+    app.post('/purchase-query-form/:id', isLoggedIn, (req, res) => {
+        req.checkBody('urgency', 'اولویت الزامی است!').notEmpty();
+        req.checkBody('need_date', 'تاریخ نیاز الزامی است!').notEmpty();
+
+        if(req.checkBody(req.body.com_id).isEmpty()) {
+            req.body.com_id = null;
+        } else {
+            req.body.com_id = Number(req.body.com_id);
+        }
+
+        let errors = req.validationErrors();
+
+        if(errors) {
+            res.render('purchase-query-form', { errors: errors });
+        } else {
+            let form_id = req.params.id.slice(1);
+
+            let needDate = req.body.need_date;
+            let fetchingDate = {
+                year: needDate.slice(0, 4),
+                month: needDate.slice(5, 7),
+                date: needDate.slice(8)
+            }
+            let needDateToGre = jalaali.toGregorian(
+                fetchingDate.year,
+                fetchingDate.month,
+                fetchingDate.date
+            )
+
+            let purchase_query = {
+                id: form_id,
+                urgency: Number(req.body.urgency),
+                need_date: Number(needDate.gy) + '-' + Number(needDate.gm) + '-' + Number(needDate.gd)
+            }
+
+            let query = 'insert into purchase_query ( id, urgency, need_date ) values (?,?,?)';
+            db.query(query, [purchase_query.id, purchase_query.urgency, purchase_query.need_date], (err, result) => {
+                if(err) {
+                    req.flash('error_msg', 'درخواست خرید برای این کالا قبلا ثبت شده!');
+                    res.redirect('/purchase-query-management');
+                }
+
+                let form = {
+                    sta_id: req.user.id,
+                    com_id: req.body.com_id,
+                    type_no: 2,
+                    created: new Date(),
+                    comment: req.body.comment
+                }
+
+                let query = 'insert into form ( sta_id, com_id, type_no, created, comment ) values (?,?,?,?,?)';
+                db.query(query, [ form.sta_id, form.com_id, form.type_no, form.created, form.comment ], (err) => {
+                    if(err) throw err;
+
+                    req.flash('success_msg', 'درخواست خرید با موفقیت ثبت شد.');
+                    res.redirect('/purchase-query-management');
+                });
+
+
+            });
+        }
     });
 
     // /\/\/\/\/\/\/\/\/\/\/\/\/\ END OF Planning Unit SECTION /\/\/\/\/\/\/\/\/\/\/\/\/\
